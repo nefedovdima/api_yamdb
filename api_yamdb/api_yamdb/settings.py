@@ -1,5 +1,7 @@
-from pathlib import Path
+import os
+from datetime import timedelta
 
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -14,18 +16,20 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'api.apps.ApiConfig',
-    'titles.apps.TitlesConfig',
-    'rest_framework.authtoken'
-]
+INSTALLED_APPS = ["django.contrib.admin",
+                  "django.contrib.auth",
+                  "django.contrib.contenttypes",
+                  "django.contrib.sessions",
+                  "django.contrib.messages",
+                  "django.contrib.staticfiles",
+                  "rest_framework",
+                  "rest_framework_simplejwt",
+                  "api.apps.ApiConfig",
+                  "titles.apps.TitlesConfig",
+                  "users.apps.UsersConfig",
+                  "django_filters",
+                  ]
+
 # 'users.apps.UsersConfig'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -107,11 +111,24 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 
+AUTH_USER_MODEL = "users.User"
+
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', 
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
     ],
-     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ]
-} 
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 10,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_mails")
