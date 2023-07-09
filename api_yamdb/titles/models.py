@@ -23,7 +23,11 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     genre = models.ManyToManyField(Genre, through='GenreTitle')
-
+    category  = models.ForeignKey(
+        Category,
+        on_delete=models.SET(''),
+        related_name='titles'
+    )
     def __str__(self):
         return self.name
 

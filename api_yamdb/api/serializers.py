@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.core.files.base import ContentFile
 from titles.models import (Title, Category, Genre,
                            Review, Comment)
-
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,45 +30,14 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(),
         slug_field='slug'
     )
-    # genre = GenreSerializer(many=True)
-    # category = CategorySerializer()
 
     class Meta:
         model = Title
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     genres = validated_data.pop('genre')
-    #     category = validated_data.pop('category')
-    #     title = Title.objects.create(**validated_data)
-    #     for genre in genres:
-
-    #         current_genre, status = Genre.objects.get_or_create(
-    #             **genre)
-
-    #         GenreTitle.objects.create(
-    #             genre=current_genre, tilte=tilte)
-        
-    #     current_category, status = Category.objects.get_or_create(**category)
-    #     CategoryTitle.objects.create(category=current_category, tilte=tilte)
-    #     return title
-
     def to_representation(self, instance):
         representation = TitleRetrieveSerializer(instance).data
         return representation
-
-    # def to_representation(self, instance):
-    #     representation = super().to_representation(instance)
-    #     representation['genre'] = GenreSerializer(
-    #         instance=instance.genre,
-    #         many=True
-    #     ).data
-    #     representation['category'] = CategorySerializer(
-    #         instance=instance.category,
-    #     ).data
-    #     return representation
-    
 
 class TitleRetrieveSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(
@@ -91,14 +60,31 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
     )
+
+    def validate_score(self, value):
+        if 0 < value < 11:
+            return value
+        raise serializers.ValidationError('Оценка от 1 до 10 включительно')
+    
     class Meta:
         model = Review
         fields = '__all__'
-        read_only_fields = ['author', 'title']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Review.objects.all(),
+                fields=('title', 'author'),
+                message='Один отзыв на одно произведение'
+            )
+        ]
+    
 
 
 
