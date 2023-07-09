@@ -22,14 +22,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    # genre = models.ForeignKey(Genre,
-    #                           on_delete=models.SET(''),
-    #                           related_name='titles')
-    # category = models.ForeignKey(Category,
-    #                              on_delete=models.SET(''),
-    #                              related_name='titles'
     genre = models.ManyToManyField(Genre, through='GenreTitle')
-    category = models.ManyToManyField(Category, through='CategoryTitle')
 
     def __str__(self):
         return self.name
@@ -42,15 +35,6 @@ class GenreTitle(models.Model):
         return f'{self.genre} {self.title}'
 
 
-class CategoryTitle(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.category} {self.title}'
-
-
-
 class Review(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
@@ -58,6 +42,7 @@ class Review(models.Model):
         Title, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
     score = models.IntegerField()
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
 
 class Comment(models.Model):
@@ -66,4 +51,4 @@ class Comment(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
-    score = models.IntegerField()
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
