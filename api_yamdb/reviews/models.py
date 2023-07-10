@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from titles.validatots import year_of_creation_validator
+from reviews.validatots import year_of_creation_validator
 from users.models import User
 
 
@@ -36,6 +36,7 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
@@ -65,6 +66,7 @@ class Review(models.Model):
             models.UniqueConstraint(fields=["author", "title"],
                                     name="author_review")
         ]
+
 
 class Comment(models.Model):
     author = models.ForeignKey(

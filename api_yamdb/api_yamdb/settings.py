@@ -25,7 +25,7 @@ INSTALLED_APPS = ["django.contrib.admin",
                   "rest_framework",
                   "rest_framework_simplejwt",
                   "api.apps.ApiConfig",
-                  "titles.apps.TitlesConfig",
+                  "reviews.apps.ReviewsConfig",
                   "users.apps.UsersConfig",
                   "django_filters",
                   ]
@@ -125,7 +125,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 

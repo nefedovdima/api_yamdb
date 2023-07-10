@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
-from titles.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
@@ -80,14 +80,14 @@ class ReviewSerializer(serializers.ModelSerializer):
                 author_id=user.id, title_id=title_id
             ).exists():
                 raise serializers.ValidationError(
-                    "Вы не можете оставить отзыв дважды! :)"
+                    "Отзыв можно оставить только один раз"
                 )
         return data
 
     def validate_score(self, value):
         if not 1 <= value <= 10:
             raise serializers.ValidationError(
-                'Оценку можно поставить только от 1 до 10'
+                'Оценку должна быть от 1 до 10'
             )
         return value
 
@@ -128,7 +128,7 @@ class RegistrationSerializer(serializers.Serializer):
     def validate_username(self, value):
         if value == "me":
             raise serializers.ValidationError(
-                'Невозможно использовать имя "me" для регистрации.'
+                'Имя me недоступно для регистрации'
             )
         return value
 
