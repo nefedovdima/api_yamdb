@@ -35,13 +35,6 @@ class TitlePostSerializer(serializers.ModelSerializer):
             "genre",
         )
 
-    def validate_year(self, value):
-        if not (0 < value <= timezone.now().year):
-            raise serializers.ValidationError(
-                'Год произведения не может быть из будущего'
-            )
-        return value
-
 
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
@@ -84,13 +77,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
         return data
 
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Оценку должна быть от 1 до 10'
-            )
-        return value
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -126,6 +112,7 @@ class RegistrationSerializer(serializers.Serializer):
     )
 
     def validate_username(self, value):
+        value = value.lower()
         if value == "me":
             raise serializers.ValidationError(
                 'Имя me недоступно для регистрации'

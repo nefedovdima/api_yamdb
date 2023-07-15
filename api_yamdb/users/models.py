@@ -39,11 +39,6 @@ class User(AbstractUser):
         max_length=15,
         default=USER,
     )
-    confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=100,
-        null=True,
-    )
     bio = models.TextField(
         'Биография',
         blank=True,

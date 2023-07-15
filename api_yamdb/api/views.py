@@ -1,8 +1,7 @@
-from uuid import uuid4
-
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Avg
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
@@ -10,14 +9,12 @@ from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
-
 from api_yamdb.settings import DEFAULT_FROM_EMAIL
-
 from api.filters import TitleFilter
 from api.mixins import CreateListDestroyViewSet
-
 from api.permissions import (IsAdmin, IsAdminOrReadOnly,
                              IsAuthorModeratorAdminOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
@@ -74,11 +71,11 @@ def create_user(request):
         )
     if created:
         user.is_active = False
-    user.confirmation_code = uuid4().hex
     user.save()
+    confirmation_code = default_token_generator.make_token(user)
     send_mail(
         "Подтвердите регистрацию",
-        f"Код подтверждения: {user.confirmation_code}",
+        f"Код подтверждения: {confirmation_code}",
         DEFAULT_FROM_EMAIL,
         [user.email],
     )
@@ -92,7 +89,7 @@ def create_token(request):
     username = serializer.validated_data.get("username")
     confirmation_code = serializer.validated_data.get("confirmation_code")
     user = get_object_or_404(User, username=username)
-    if confirmation_code == user.confirmation_code:
+    if default_token_generator.check_token(user, confirmation_code):
         user.is_active = True
         user.save()
         token = AccessToken.for_user(user)
@@ -141,12 +138,11 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitlePostSerializer
 
     def get_queryset(self):
-        if self.action in ('list', 'retrieve'):
+        if self.action in ['list', 'retrieve']:
             return (
                 Title.objects.prefetch_related('reviews').all().
                 annotate(rating=Avg('reviews__score')).
-                order_by('name')
-            )
+                order_by('name'))
         return Title.objects.all()
 
 
