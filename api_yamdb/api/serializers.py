@@ -111,8 +111,7 @@ class RegistrationSerializer(serializers.Serializer):
     )
 
     def validate_username(self, value):
-        value = value.lower()
-        if value == "me":
+        if value.lower() == "me":
             raise serializers.ValidationError(
                 'Имя me недоступно для регистрации'
             )
